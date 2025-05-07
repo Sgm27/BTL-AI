@@ -2,6 +2,8 @@
 
 Hệ thống quản lý thông minh tích hợp AI dành cho doanh nghiệp, tự động hóa dịch vụ khách hàng, quản lý trang Facebook, và theo dõi kho hàng.
 
+![Dịch vụ Khách hàng Facebook](images/page_service.png)
+
 ## Tổng quan Dự án
 
 BTL AI là một hệ thống quản lý toàn diện cho doanh nghiệp, kết hợp công nghệ AI tiên tiến để tự động hóa các quy trình kinh doanh. Hệ thống tận dụng các mô hình ngôn ngữ lớn (LLM), trí tuệ nhân tạo và tự động hóa quy trình để cung cấp:
@@ -35,6 +37,8 @@ Dự án được tổ chức với các thành phần chính sau:
 - **profile.pdf**: Tài liệu thông tin về hồ sơ người dùng/doanh nghiệp
 
 ## Tính năng Nổi bật
+
+![Quản lý Trang Facebook](images/page_management.png)
 
 ### 1. Dịch vụ Khách hàng AI
 
