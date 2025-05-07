@@ -1,0 +1,2228 @@
+{
+  "name": "BTL AI Facebook Page Service",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "299a9ed9-d9e2-44ab-8b71-15868df01dce",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -1064,
+        160
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "uJe0O52dyYL3TVOM",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.data || $json.text || $json.concatenated_data }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=file_id",
+                "value": "={{ $('Set File ID').first().json.file_id }}"
+              },
+              {
+                "name": "file_title",
+                "value": "={{ $('Set File ID').first().json.file_title }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "e75138b7-dd23-4ce5-9667-f9893573da26",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        220,
+        1682.5
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "91c95fc6-024b-4ac7-b3cb-7291eb6deb28",
+      "name": "Embeddings OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        100,
+        1680
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "uJe0O52dyYL3TVOM",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Set File ID').item.json.file_id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "33fca834-6e99-45ae-8edd-aeaca36dfc61",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1000,
+        1735
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JT7gomVy5RDzsGXU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "12RhQPHhTATf4xrsd_u4S_ILfEFc0zxEA",
+          "mode": "list",
+          "cachedResultName": "BTL AI Customer Service Documents",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/12RhQPHhTATf4xrsd_u4S_ILfEFc0zxEA"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "711fb741-ed5b-4c4f-acdf-739c70c319ca",
+      "name": "File Created",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2320,
+        1785
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JT7gomVy5RDzsGXU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "12RhQPHhTATf4xrsd_u4S_ILfEFc0zxEA",
+          "mode": "list",
+          "cachedResultName": "BTL AI Customer Service Documents",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/12RhQPHhTATf4xrsd_u4S_ILfEFc0zxEA"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "a73608fb-5391-4e98-8207-0674dc7eedef",
+      "name": "File Updated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2320,
+        1985
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JT7gomVy5RDzsGXU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "580a88ef-df82-4f98-9dec-b0ba2353d5cc",
+      "name": "Extract Document Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        2249.5
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('If').item.json.body.entry[0].id }}"
+      },
+      "id": "f2f53f3e-1635-4ad0-8d66-ac7a377fdbe9",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        160
+      ],
+      "notesInFlow": false,
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "documents",
+        "filterType": "string",
+        "filterString": "=metadata->>file_id=like.*{{ $json.file_id }}*"
+      },
+      "id": "88e68c10-79b9-4299-a406-990b171c0d4a",
+      "name": "Delete Old Doc Rows",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1660,
+        1735
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "vD451OZ7LFoYP2zH",
+          "name": "BTL AI Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10646eae-ae46-4327-a4dc-9987c2d76173",
+              "name": "file_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f4536df5-d0b1-4392-bf17-b8137fb31a44",
+              "name": "file_type",
+              "value": "={{ $json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "77d782de-169d-4a46-8a8e-a3831c04d90f",
+              "name": "file_title",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9bde4d7f-e4f3-4ebd-9338-dce1350f9eab",
+              "name": "file_url",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b18661d8-bd7b-4d40-9be6-13470c606cff",
+      "name": "Set File ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1880,
+        1735
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9a9a245e-f1a1-4282-bb02-a81ffe629f0f",
+              "name": "chatInput",
+              "value": "={{ $json?.chatInput || $json.body.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "b80831d8-c653-4203-8706-adedfdb98f77",
+              "name": "sessionId",
+              "value": "={{ $json?.sessionId || $json.body.sessionId}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "add38770-7515-44bf-9aec-91967ddf6b5b",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "88692949-ffd9-4809-b980-8e00908b8ad2",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1600,
+        -120
+      ],
+      "webhookId": "e104e40e-6134-4825-a6f0-8a646d882662"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "12d45f6f-a72f-4104-a175-ab439d4f1956",
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        1474.5
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "f0593fa5-3db2-4a25-8fb4-e633df0ad993",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        1760
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "17b0e6f0-1a4a-4893-b91a-89ca18fab9e3",
+      "name": "Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        308,
+        1880
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bead5d64-a39d-4b77-a2d8-1ed3ccf5376b",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message_content }}",
+        "options": {
+          "systemMessage": "Bạn là trợ lý ảo của cửa hàng tạp hóa, giúp khách hàng tìm kiếm thông tin về sản phẩm từ kho dữ liệu của cửa hàng. Kho dữ liệu này bao gồm các tài liệu dạng văn bản (Txt, docs, PDF, v.v.) hoặc dữ liệu bảng (CSV hoặc Excel).\n\nBạn được cung cấp các công cụ để thực hiện RAG trong bảng 'documents', tra cứu các tài liệu có sẵn trong cơ sở dữ liệu của bạn trong bảng 'document_metadata', trích xuất toàn bộ văn bản từ một tài liệu cụ thể, và truy vấn dữ liệu bảng bằng SQL trong bảng 'document_rows'.\n\nLuôn bắt đầu bằng cách thực hiện RAG trừ khi câu hỏi yêu cầu truy vấn SQL cho dữ liệu bảng (tính tổng, tìm giá trị lớn nhất, hoặc những thông tin mà RAG không thể tìm kiếm chính xác). Nếu RAG không giúp được, hãy xem những tài liệu có sẵn, tìm vài tài liệu có thể chứa câu trả lời, và phân tích chúng.\n\nLuôn trả lời một cách lịch sự và tôn trọng, sử dụng ngôn ngữ thân thiện để đảm bảo sự hài lòng của khách hàng. Nếu bạn không tìm thấy câu trả lời, hãy thông báo cho người dùng một cách nhã nhặn và đề xuất các phương án thay thế. Đảm bảo câu trả lời của bạn không vượt quá 2000 ký tự và luôn cung cấp thông tin chính xác, không bịa ra thông tin chỉ để làm hài lòng khách hàng."
+        }
+      },
+      "id": "f77408b4-405c-440a-a54e-aa5ca8639967",
+      "name": "RAG AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -840,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "2ae7faa7-a936-4621-a680-60c512163034",
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "fc193b06-363b-4699-a97d-e5a850138b0e",
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "=application/vnd.google-apps.spreadsheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b69f5605-0179-4b02-9a32-e34bb085f82d",
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "application/vnd.google-apps.document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 3
+        }
+      },
+      "id": "b080646e-6de9-42e6-940e-b452a6816435",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -780,
+        1714
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "5ba698e3-395f-44e8-85ac-a85b4db26792",
+      "name": "Insert into Supabase Vectorstore",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        116,
+        1460
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "vD451OZ7LFoYP2zH",
+          "name": "BTL AI Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "id": "3813302c-4bcf-4ccc-8e97-1a9931091b44",
+      "name": "Extract from Excel",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        1674.5
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f422e2e0-381c-46ea-8f38-3f58c501d8b9",
+              "name": "schema",
+              "value": "={{ $('Extract from Excel').isExecuted ? $('Extract from Excel').first().json.keys().toJsonString() : $('Extract from CSV').first().json.keys().toJsonString() }}",
+              "type": "string"
+            },
+            {
+              "id": "bb07c71e-5b60-4795-864c-cc3845b6bc46",
+              "name": "data",
+              "value": "={{ $json.concatenated_data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        238,
+        2160
+      ],
+      "id": "f7c2a46d-3a14-4690-a041-957d2543f525",
+      "name": "Set Schema"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        2060
+      ],
+      "id": "f3cdec72-3649-4e43-9789-6a2c9150d156",
+      "name": "Extract from CSV"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE document_metadata (\n    id TEXT PRIMARY KEY,\n    title TEXT,\n    url TEXT,\n    created_at TIMESTAMP DEFAULT NOW(),\n    schema TEXT\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1880,
+        1200
+      ],
+      "id": "948d800e-8c08-4a98-8eb4-968f7c6a960e",
+      "name": "Create Document Metadata Table",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE document_rows (\n    id SERIAL PRIMARY KEY,\n    dataset_id TEXT REFERENCES document_metadata(id),\n    row_data JSONB  -- Store the actual row data\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1660,
+        1200
+      ],
+      "id": "ce8e2e5c-ae1b-4d7f-8c62-4420cedb1693",
+      "name": "Create Document Rows Table (for Tabular Data)",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Sử dụng công cụ này để lấy danh sách tất cả các tài liệu có sẵn, bao gồm cả cấu trúc bảng nếu tệp là CSV hoặc Excel.",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_metadata",
+          "mode": "list",
+          "cachedResultName": "document_metadata"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        -824,
+        160
+      ],
+      "id": "8905d43a-ffae-496f-9509-9537ed76a0d1",
+      "name": "List Documents",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Với ID tệp được cung cấp, công cụ này lấy văn bản từ tài liệu.",
+        "operation": "executeQuery",
+        "query": "SELECT \n    string_agg(content, ' ') as document_text\nFROM documents\n  WHERE metadata->>'file_id' = $1\nGROUP BY metadata->>'file_id';",
+        "options": {
+          "queryReplacement": "={{ $fromAI('file_id') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        -704,
+        160
+      ],
+      "id": "dc19abcb-f17d-4031-b0b3-7a8660c3e8d1",
+      "name": "Get File Contents",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Chạy truy vấn SQL - sử dụng công cụ này để truy vấn từ bảng document_rows sau khi bạn biết file_id bạn đang truy vấn. dataset_id là file_id và bạn luôn sử dụng row_data để lọc, đây là trường jsonb chứa tất cả các khóa từ cấu trúc tệp được cung cấp trong bảng document_metadata.\n\nVí dụ truy vấn:\n\nSELECT AVG((row_data->>'revenue')::numeric)\nFROM document_rows\nWHERE dataset_id = '123';\n\nVí dụ truy vấn 2:\n\nSELECT \n    row_data->>'category' as category,\n    SUM((row_data->>'sales')::numeric) as total_sales\nFROM dataset_rows\nWHERE dataset_id = '123'\nGROUP BY row_data->>'category';",
+        "operation": "executeQuery",
+        "query": "{{ $fromAI('sql_query') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        -584,
+        160
+      ],
+      "id": "ad597aac-030d-4e21-bd73-6ec2e87ede9a",
+      "name": "Query Document Rows",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "documents",
+        "toolDescription": "Sử dụng RAG để tìm kiếm thông tin trong cơ sở kiến thức.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 8,
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        162.5
+      ],
+      "id": "5fa96488-9722-49ed-9565-d40f40ba8536",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "vD451OZ7LFoYP2zH",
+          "name": "BTL AI Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -376,
+        360
+      ],
+      "id": "4ff77f33-a037-4731-b709-d5b0159a9ea8",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "uJe0O52dyYL3TVOM",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2100,
+        1885
+      ],
+      "id": "93c88ee1-5577-4c10-acaa-4ba83831e395",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "document_rows",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "dataset_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Set File ID').item.json.file_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1440,
+        1735
+      ],
+      "id": "e73893e1-3ef2-443c-ac8a-a24809d7df2d",
+      "name": "Delete Old Data Rows",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "vD451OZ7LFoYP2zH",
+          "name": "BTL AI Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_metadata",
+          "mode": "list",
+          "cachedResultName": "document_metadata"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Set File ID').item.json.file_id }}",
+            "title": "={{ $('Set File ID').item.json.file_title }}",
+            "url": "={{ $('Set File ID').item.json.file_url }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "schema",
+              "displayName": "schema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1220,
+        1735
+      ],
+      "id": "f5d09bde-9e95-4e72-b852-f03be98e4f6f",
+      "name": "Insert Document Metadata",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_rows",
+          "mode": "list",
+          "cachedResultName": "document_rows"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "dataset_id": "={{ $('Set File ID').item.json.file_id }}",
+            "row_data": "={{ $json.toJsonString().replaceAll(/'/g, \"''\") }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "dataset_id",
+              "displayName": "dataset_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_data",
+              "displayName": "row_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -340,
+        1960
+      ],
+      "id": "18f6c298-f947-4e4d-a368-7bf6b5cc24a8",
+      "name": "Insert Table Rows",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_metadata",
+          "mode": "list",
+          "cachedResultName": "document_metadata"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Set File ID').item.json.file_id }}",
+            "schema": "={{ $json.schema }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "schema",
+              "displayName": "schema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        596,
+        2160
+      ],
+      "id": "aafd1e70-4f26-47b6-9b53-233418f4a273",
+      "name": "Update Schema for Document Metadata",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Enable the pgvector extension to work with embedding vectors\ncreate extension vector;\n\n-- Create a table to store your documents\ncreate table documents (\n  id bigserial primary key,\n  content text, -- corresponds to Document.pageContent\n  metadata jsonb, -- corresponds to Document.metadata\n  embedding vector(1536) -- 1536 works for OpenAI embeddings, change if needed\n);\n\n-- Create a function to search for documents\ncreate function match_documents (\n  query_embedding vector(1536),\n  match_count int default null,\n  filter jsonb DEFAULT '{}'\n) returns table (\n  id bigint,\n  content text,\n  metadata jsonb,\n  similarity float\n)\nlanguage plpgsql\nas $$\n#variable_conflict use_column\nbegin\n  return query\n  select\n    id,\n    content,\n    metadata,\n    1 - (documents.embedding <=> query_embedding) as similarity\n  from documents\n  where metadata @> filter\n  order by documents.embedding <=> query_embedding\n  limit match_count;\nend;\n$$;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -2100,
+        1200
+      ],
+      "id": "0b6528e0-14b6-4b0d-8bad-5b2edd85f9f5",
+      "name": "Create Documents Table and Match Function",
+      "credentials": {
+        "postgres": {
+          "id": "uxj98RXRW276jVHB",
+          "name": "BTL AI Page Customer Service"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2320,
+        1200
+      ],
+      "id": "5b284b14-8ae6-4f20-a6a1-ce6b7230c9cd",
+      "name": "When clicking 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "4d424fa8-5d83-418b-bb9b-92e5741bba84",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2320,
+        200
+      ],
+      "id": "5ebac763-c5dc-40fb-9e34-2243cc7eabf2",
+      "name": "Webhook1",
+      "webhookId": "4d424fa8-5d83-418b-bb9b-92e5741bba84"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "245f3e1f-a916-4bc5-9923-b01c3e67527b",
+              "name": "query[\"hub.challenge\"]",
+              "value": "={{ $json.query[\"hub.challenge\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2040,
+        100
+      ],
+      "id": "b6790f9a-ce6d-45a7-bbfe-4f1cc408215c",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query[\"hub.challenge\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -1880,
+        140
+      ],
+      "id": "62ed5cb2-9fcb-41a4-8919-4590b7d9090e",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8623aeb7-6251-4140-8792-619e442956bf",
+              "leftValue": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2100,
+        340
+      ],
+      "id": "be8fe8eb-b312-461e-8a4a-734de42de3a5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bf342c4b-a7c4-4cbb-ab63-c103cb7274f1",
+              "name": "sender_id",
+              "value": "={{ $json.body.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "703e4eae-519b-47e9-90cf-30b9bce41752",
+              "name": "recipient_id",
+              "value": "={{ $json.body.entry[0].messaging[0].recipient.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f160894c-b723-4cd0-ad20-99a11d6d09bd",
+              "name": "message_content",
+              "value": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1880,
+        340
+      ],
+      "id": "c0c8e1ab-e981-4f89-8493-a9942e0c91b0",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/682168254969980/messages/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAy80YviqmoBO3gjcmPriCjZAzDDPB5Tx2PzaFEfTJ0CcjFd59eZBQc5gcmjtUndvCrVfTOS6uZARiG0FIqAenU3Fzm1qMawtOZBUpSPuq2zaUkUFL2BrxqxP9q6mvkx3jf6ufQSAzHRTYRgLZAqq03i1tK9ZCHoP9RIsjExzbwNtIgpHnbbzOSP75vmJZB"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1582,
+        740
+      ],
+      "id": "34a77bd6-cc52-4cca-a3db-c374080ad203",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = {\n  recipient: {\n    id: $input.first().json.body.entry[0].messaging[0].sender.id\n  },\n  messaging_type: \"RESPONSE\",\n  message: {\n    text: \"Tôi chỉ phục vụ cho việc hỗ trợ thông tin về sản phẩm và dịch vụ của cửa hàng. Nếu bạn có bất kỳ câu hỏi nào liên quan, xin vui lòng cho tôi biết.\"\n  }\n};\n\nreturn {\n  data: body\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1880,
+        740
+      ],
+      "id": "e02852c2-8357-4fab-a6a2-c5041bc0f84d",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('If').item.json.body.entry[0].messaging[0].message.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "relevant",
+              "description": "Câu hỏi CÓ liên quan đến việc mua bán sản phẩm hoặc thông tin của cửa hàng"
+            },
+            {
+              "category": "not relevant",
+              "description": "Câu hỏi KHÔNG liên quan đến việc mua bán sản phẩm hoặc thông tin của cửa hàng"
+            },
+            {
+              "category": "staff",
+              "description": "Câu hỏi đề cập đến việc gọi nhân viên hoặc muốn đặt hàng, mua hàng hoặc hủy hàng một sản phẩm nào đó."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        -1660,
+        240
+      ],
+      "id": "129b9b41-efd2-4be4-8701-525881e028de",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite-preview-02-05",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1640,
+        460
+      ],
+      "id": "9699f1c7-40a1-4c01-a427-541d3e32e046",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "iMHlQs5KpEFbAcwp",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/682168254969980/messages/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAy80YviqmoBO3gjcmPriCjZAzDDPB5Tx2PzaFEfTJ0CcjFd59eZBQc5gcmjtUndvCrVfTOS6uZARiG0FIqAenU3Fzm1qMawtOZBUpSPuq2zaUkUFL2BrxqxP9q6mvkx3jf6ufQSAzHRTYRgLZAqq03i1tK9ZCHoP9RIsjExzbwNtIgpHnbbzOSP75vmJZB"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -920,
+        840
+      ],
+      "id": "b25e40c9-9877-42ee-97b9-ea496d6d32ab",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = {\n  recipient: {\n    id: $('Edit Fields1').first().json.sender_id\n  },\n  messaging_type: \"RESPONSE\",\n  message: {\n    text: \"Mình đã nhận yêu cầu! Đang tiến hành liên lạc với nhân viên và sẽ phản hồi trong thời gian sớm nhất. Bạn vui lòng chờ trong giây lát...\"\n  }\n};\n\nreturn {\n  data: body\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1284,
+        840
+      ],
+      "id": "9dd3b4ef-5714-44ba-a465-4130e128d4b4",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/682168254969980/messages/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAy80YviqmoBO3gjcmPriCjZAzDDPB5Tx2PzaFEfTJ0CcjFd59eZBQc5gcmjtUndvCrVfTOS6uZARiG0FIqAenU3Fzm1qMawtOZBUpSPuq2zaUkUFL2BrxqxP9q6mvkx3jf6ufQSAzHRTYRgLZAqq03i1tK9ZCHoP9RIsjExzbwNtIgpHnbbzOSP75vmJZB"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -60
+      ],
+      "id": "18097329-7957-4f3e-88a7-f408b071fb36",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = {\n  recipient: {\n    id: $('Edit Fields1').first().json.sender_id\n  },\n  messaging_type: \"RESPONSE\",\n  message: {\n    text: $input.first().json.output.substring(0, 2000)\n  }\n};\n\nreturn {\n  data: body\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -360,
+        -60
+      ],
+      "id": "3bae51cc-dd51-4a08-8fe2-e5cf8be901e0",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/682168254969980/messages/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAy80YviqmoBO3gjcmPriCjZAzDDPB5Tx2PzaFEfTJ0CcjFd59eZBQc5gcmjtUndvCrVfTOS6uZARiG0FIqAenU3Fzm1qMawtOZBUpSPuq2zaUkUFL2BrxqxP9q6mvkx3jf6ufQSAzHRTYRgLZAqq03i1tK9ZCHoP9RIsjExzbwNtIgpHnbbzOSP75vmJZB"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -960,
+        340
+      ],
+      "id": "39d27e81-3e00-4840-901c-9b3699033015",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = {\n  recipient: {\n    id: $input.first().json.sender_id\n  },\n  messaging_type: \"RESPONSE\",\n  message: {\n    text: \"Tôi chỉ phục vụ cho việc hỗ trợ thông tin về sản phẩm và dịch vụ của cửa hàng. Nếu bạn có bất kỳ câu hỏi nào liên quan, xin vui lòng cho tôi biết.\"\n  }\n};\n\nreturn {\n  data: body\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1260,
+        340
+      ],
+      "id": "325f754a-e68e-47a3-9206-35bd9f80a2ea",
+      "name": "Code"
+    }
+  ],
+  "pinData": {
+    "File Created": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "viewedByMe": true,
+          "mimeType": "application/vnd.google-apps.spreadsheet",
+          "exportLinks": {
+            "application/x-vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=ods",
+            "text/tab-separated-values": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=tsv",
+            "application/pdf": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=xlsx",
+            "text/csv": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=csv",
+            "application/zip": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=zip",
+            "application/vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=ods"
+          },
+          "parents": [
+            "1HtaIIK3kWwjbwhsmEbtJ-upalxVn3Ek9"
+          ],
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBO25toxt6RwVPjSmlzZEda-lk4VxRy3zObFMOtcvKSX8m0uyYJAOMHYjIxSVnl6GgWT9QJFzn6oAaUFOPdnWPB89gUcAo5c97K0oNb1vYNFjk5jEOpro51Aa5PYpA=s220",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.spreadsheet",
+          "shared": false,
+          "lastModifyingUser": {
+            "displayName": "Cole Medin",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "09805982089636049437",
+            "emailAddress": "colemedin@ottomator.ai",
+            "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXYQW9sb7WW3wnC-1AVobRmOW6jJVl-c6A8a1Vmfg22B_llKKPYSlKo9UEZvIV23wtXqnJ0dgC56hiJN_z6e2d9S2MdiFDTpg7cyD-gXf1LICu2REL4QH54-MvYmKecDcm4MgnZYSms-X1KpD6seI1pkEehGcRg0NIXn2wGCPicXUZ30K8SFo9PxCr_0NRyR93hQn8hkX3Ml1nBuHIRL4Fvu5MjOvxRJQkqaF9zf0JVyB1LHdV-Ypr87v_B_7hDaJ8Jor2z73LA-rKq_mcU6Ta46Hsm83AnTY3iOJE9WxH2Cd9N795co4COaYL5hHEADdPq_B-OfVcbYNk1kf2qT4Josi_cu1uRGUFnhpBpD5Cu5uy2qD-J8GrMgkKdRKr1S7Z9ZD6bYyb3r3j6s4NHpE_iswHBJh-WfD2fg590TiCs6ciAPbx5769BYDF6Z2hVsCVq0G5bgS3JfbCTVNk8mNCh_4gzyRyfzj38OR0L5Fngv1i8y-HluGNw2k37cyrYu4HunKjMZKy_NsmOTWLITeyU_VoDvH-egUftryYVVCdUn1SEpSjDByjpLmQqCk-Kg3jK-0DGmClkblFw_svgvWUqyoOWMHHpH5fNTLdmPYK6w0Zcft5GXar9bahLAK9IT-epMIFTwnxhQu2yT0cP1I186OoWWUxCapElN_AEJDhibEMLyrHlmJUuhq205dClKGEvXw9D2ejYVpY0xVQ1ZxpKV-QGDTkniAjlWVCRwdaDrgbH3ieKgy5LXj357oCXUwRC-5niqp5MiybN0bN7KUe1zPSJjMDSjIkKcUMd_uAx_hlFkhx_jD0i0IMs3BLQ3OEOLw1IoD2Lol6jBstCUcZFCQrikP7d-nabEX8yDTLfYi9e8sDPp2yNA4pBJfKUm9-AHOAFWZ1BzXJN97RIiTQyKdExCKSz3kPf2lrQyTDVwYkZ75-ZkksHvXoz3kWo3MrAjGl56MxCrOkd88teMhDHq0E=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Cole Medin",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "09805982089636049437",
+              "emailAddress": "colemedin@ottomator.ai",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXYQW9sb7WW3wnC-1AVobRmOW6jJVl-c6A8a1Vmfg22B_llKKPYSlKo9UEZvIV23wtXqnJ0dgC56hiJN_z6e2d9S2MdiFDTpg7cyD-gXf1LICu2REL4QH54-MvYmKecDcm4MgnZYSms-X1KpD6seI1pkEehGcRg0NIXn2wGCPicXUZ30K8SFo9PxCr_0NRyR93hQn8hkX3Ml1nBuHIRL4Fvu5MjOvxRJQkqaF9zf0JVyB1LHdV-Ypr87v_B_7hDaJ8Jor2z73LA-rKq_mcU6Ta46Hsm83AnTY3iOJE9WxH2Cd9N795co4COaYL5hHEADdPq_B-OfVcbYNk1kf2qT4Josi_cu1uRGUFnhpBpD5Cu5uy2qD-J8GrMgkKdRKr1S7Z9ZD6bYyb3r3j6s4NHpE_iswHBJh-WfD2fg590TiCs6ciAPbx5769BYDF6Z2hVsCVq0G5bgS3JfbCTVNk8mNCh_4gzyRyfzj38OR0L5Fngv1i8y-HluGNw2k37cyrYu4HunKjMZKy_NsmOTWLITeyU_VoDvH-egUftryYVVCdUn1SEpSjDByjpLmQqCk-Kg3jK-0DGmClkblFw_svgvWUqyoOWMHHpH5fNTLdmPYK6w0Zcft5GXar9bahLAK9IT-epMIFTwnxhQu2yT0cP1I186OoWWUxCapElN_AEJDhibEMLyrHlmJUuhq205dClKGEvXw9D2ejYVpY0xVQ1ZxpKV-QGDTkniAjlWVCRwdaDrgbH3ieKgy5LXj357oCXUwRC-5niqp5MiybN0bN7KUe1zPSJjMDSjIkKcUMd_uAx_hlFkhx_jD0i0IMs3BLQ3OEOLw1IoD2Lol6jBstCUcZFCQrikP7d-nabEX8yDTLfYi9e8sDPp2yNA4pBJfKUm9-AHOAFWZ1BzXJN97RIiTQyKdExCKSz3kPf2lrQyTDVwYkZ75-ZkksHvXoz3kWo3MrAjGl56MxCrOkd88teMhDHq0E=s64"
+            }
+          ],
+          "webViewLink": "https://docs.google.com/spreadsheets/d/1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM/edit?usp=drivesdk",
+          "size": "1024",
+          "viewersCanCopyContent": true,
+          "permissions": [
+            {
+              "id": "09805982089636049437",
+              "displayName": "Cole Medin",
+              "type": "user",
+              "kind": "drive#permission",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjU-zfOspR2RPV0ODNiUMTUKvYDBBCZV-dZusxjov3wKmsVu93G9IfBKLBtQef-ZfzxVCqoc8HAVOEJyVPWiFax-dpQqjp5Bmqnsiestzam2U55u4Y7m3qszgGuIwTYYCQ4-TI6w2ActqiVwzXSrFt8hF5q5UYn1zzHvR8OG1fQHhoxUgOpsSwsylfLh2gRj49gNFuJ0tQZFIT37R0-dsKLjV0DqBDUpqHgP4mnA02dUgy3D9BjshwfHQY-IdWnK1xGTrunpzeHBrIE306eUhHcXaN2D0P8vAdpFRjTKyJMCDVp5ZVMn79MSZwUVbN9TGD_u4DpbXFVB27hi4MjS8mHblF5tJLSKtLs-UW4itcrt-QnUMeHkIEpcly8vsGcuiOmyNHlldsJ79HhOsSPhY9vxvwSpXBOn_9F15_808Om2de0duT2RewGeMlEXXjE0PO456Y4BStBV1uRa3VceZ2l3MgXkbF8BZG_f0DjNrVkW7xqdOHBArDO87vRhEawPlaWPTFw8UX7kGRsV9jIyRuLmvcSINIW2nEuZOXyKFeHR6IfIRIuTk0F7E0qk8WFtQlvVx-a--ELays2G5R1oVqrFst2mbO6U9wQz9Uhz3SDsIh6OB7S0e86x0hkdFS1lbKmxSqpXx-d-kcYuW88etuwSYnoZEQVAs1Vyu_XHYxfMw_nFZ0PTH_LMc9DYINUILulRvuMPq_bfkusoIr4EEyZTGtQVy-4qf01eEgRCG1xGBIN6_6dzyWGZoHdayfSXyDoFfwE2vcWBz30qFeImwis1u67VnbWCyfC0vb8rEScWo19XpyxW81umlcTlOXA8buq7nnD8IgVETwn7islB-mzsjnQOtrjDCOJ4T4KdzYYpM0iWdwSbhu95sDfa2GBeNSM6_shlwwm88V56XEyDZ7t0K52rtgjX7tI9qQg_5uAsQSmUQWwHXs1qLw_0Lm8HJm7NTJey6_uN2pCzhM-eajxl3Gw=s64",
+              "emailAddress": "colemedin@ottomator.ai",
+              "role": "owner",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "hasThumbnail": true,
+          "spaces": [
+            "drive"
+          ],
+          "id": "1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM",
+          "name": "Test Sheet #1",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "createdTime": "2025-02-23T17:00:50.000Z",
+          "modifiedTime": "2025-02-23T17:43:45.286Z",
+          "modifiedByMeTime": "2025-02-23T17:43:45.286Z",
+          "viewedByMeTime": "2025-02-23T18:21:12.774Z",
+          "quotaBytesUsed": "1024",
+          "version": "17",
+          "ownedByMe": true,
+          "isAppAuthorized": false,
+          "capabilities": {
+            "canChangeViewersCanCopyContent": true,
+            "canEdit": true,
+            "canCopy": true,
+            "canComment": true,
+            "canAddChildren": false,
+            "canDelete": true,
+            "canDownload": true,
+            "canListChildren": false,
+            "canRemoveChildren": false,
+            "canRename": true,
+            "canTrash": true,
+            "canReadRevisions": true,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canMoveItemIntoTeamDrive": true,
+            "canUntrash": true,
+            "canModifyContent": true,
+            "canMoveItemOutOfDrive": true,
+            "canAddMyDriveParent": false,
+            "canRemoveMyDriveParent": true,
+            "canMoveItemWithinDrive": true,
+            "canShare": true,
+            "canMoveChildrenWithinDrive": false,
+            "canModifyContentRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canAcceptOwnership": false,
+            "canReadLabels": false,
+            "canModifyLabels": false,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canRemoveContentRestriction": false,
+            "canDisableInheritedPermissions": false,
+            "canEnableInheritedPermissions": true
+          },
+          "thumbnailVersion": "3",
+          "modifiedByMe": true,
+          "permissionIds": [
+            "09805982089636049437"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "inheritedPermissionsDisabled": false
+        }
+      },
+      {
+        "json": {
+          "kind": "drive#file",
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "viewedByMe": true,
+          "mimeType": "application/vnd.google-apps.spreadsheet",
+          "exportLinks": {
+            "application/x-vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=ods",
+            "text/tab-separated-values": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=tsv",
+            "application/pdf": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=xlsx",
+            "text/csv": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=csv",
+            "application/zip": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=zip",
+            "application/vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM&exportFormat=ods"
+          },
+          "parents": [
+            "1HtaIIK3kWwjbwhsmEbtJ-upalxVn3Ek9"
+          ],
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBO25toxt6RwVPjSmlzZEda-lk4VxRy3zObFMOtcvKSX8m0uyYJAOMHYjIxSVnl6GgWT9QJFzn6oAaUFOPdnWPB89gUcAo5c97K0oNb1vYNFjk5jEOpro51Aa5PYpA=s220",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.spreadsheet",
+          "shared": false,
+          "lastModifyingUser": {
+            "displayName": "Cole Medin",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "09805982089636049437",
+            "emailAddress": "colemedin@ottomator.ai",
+            "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXYQW9sb7WW3wnC-1AVobRmOW6jJVl-c6A8a1Vmfg22B_llKKPYSlKo9UEZvIV23wtXqnJ0dgC56hiJN_z6e2d9S2MdiFDTpg7cyD-gXf1LICu2REL4QH54-MvYmKecDcm4MgnZYSms-X1KpD6seI1pkEehGcRg0NIXn2wGCPicXUZ30K8SFo9PxCr_0NRyR93hQn8hkX3Ml1nBuHIRL4Fvu5MjOvxRJQkqaF9zf0JVyB1LHdV-Ypr87v_B_7hDaJ8Jor2z73LA-rKq_mcU6Ta46Hsm83AnTY3iOJE9WxH2Cd9N795co4COaYL5hHEADdPq_B-OfVcbYNk1kf2qT4Josi_cu1uRGUFnhpBpD5Cu5uy2qD-J8GrMgkKdRKr1S7Z9ZD6bYyb3r3j6s4NHpE_iswHBJh-WfD2fg590TiCs6ciAPbx5769BYDF6Z2hVsCVq0G5bgS3JfbCTVNk8mNCh_4gzyRyfzj38OR0L5Fngv1i8y-HluGNw2k37cyrYu4HunKjMZKy_NsmOTWLITeyU_VoDvH-egUftryYVVCdUn1SEpSjDByjpLmQqCk-Kg3jK-0DGmClkblFw_svgvWUqyoOWMHHpH5fNTLdmPYK6w0Zcft5GXar9bahLAK9IT-epMIFTwnxhQu2yT0cP1I186OoWWUxCapElN_AEJDhibEMLyrHlmJUuhq205dClKGEvXw9D2ejYVpY0xVQ1ZxpKV-QGDTkniAjlWVCRwdaDrgbH3ieKgy5LXj357oCXUwRC-5niqp5MiybN0bN7KUe1zPSJjMDSjIkKcUMd_uAx_hlFkhx_jD0i0IMs3BLQ3OEOLw1IoD2Lol6jBstCUcZFCQrikP7d-nabEX8yDTLfYi9e8sDPp2yNA4pBJfKUm9-AHOAFWZ1BzXJN97RIiTQyKdExCKSz3kPf2lrQyTDVwYkZ75-ZkksHvXoz3kWo3MrAjGl56MxCrOkd88teMhDHq0E=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Cole Medin",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "09805982089636049437",
+              "emailAddress": "colemedin@ottomator.ai",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjXYQW9sb7WW3wnC-1AVobRmOW6jJVl-c6A8a1Vmfg22B_llKKPYSlKo9UEZvIV23wtXqnJ0dgC56hiJN_z6e2d9S2MdiFDTpg7cyD-gXf1LICu2REL4QH54-MvYmKecDcm4MgnZYSms-X1KpD6seI1pkEehGcRg0NIXn2wGCPicXUZ30K8SFo9PxCr_0NRyR93hQn8hkX3Ml1nBuHIRL4Fvu5MjOvxRJQkqaF9zf0JVyB1LHdV-Ypr87v_B_7hDaJ8Jor2z73LA-rKq_mcU6Ta46Hsm83AnTY3iOJE9WxH2Cd9N795co4COaYL5hHEADdPq_B-OfVcbYNk1kf2qT4Josi_cu1uRGUFnhpBpD5Cu5uy2qD-J8GrMgkKdRKr1S7Z9ZD6bYyb3r3j6s4NHpE_iswHBJh-WfD2fg590TiCs6ciAPbx5769BYDF6Z2hVsCVq0G5bgS3JfbCTVNk8mNCh_4gzyRyfzj38OR0L5Fngv1i8y-HluGNw2k37cyrYu4HunKjMZKy_NsmOTWLITeyU_VoDvH-egUftryYVVCdUn1SEpSjDByjpLmQqCk-Kg3jK-0DGmClkblFw_svgvWUqyoOWMHHpH5fNTLdmPYK6w0Zcft5GXar9bahLAK9IT-epMIFTwnxhQu2yT0cP1I186OoWWUxCapElN_AEJDhibEMLyrHlmJUuhq205dClKGEvXw9D2ejYVpY0xVQ1ZxpKV-QGDTkniAjlWVCRwdaDrgbH3ieKgy5LXj357oCXUwRC-5niqp5MiybN0bN7KUe1zPSJjMDSjIkKcUMd_uAx_hlFkhx_jD0i0IMs3BLQ3OEOLw1IoD2Lol6jBstCUcZFCQrikP7d-nabEX8yDTLfYi9e8sDPp2yNA4pBJfKUm9-AHOAFWZ1BzXJN97RIiTQyKdExCKSz3kPf2lrQyTDVwYkZ75-ZkksHvXoz3kWo3MrAjGl56MxCrOkd88teMhDHq0E=s64"
+            }
+          ],
+          "webViewLink": "https://docs.google.com/spreadsheets/d/1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM/edit?usp=drivesdk",
+          "size": "1024",
+          "viewersCanCopyContent": true,
+          "permissions": [
+            {
+              "id": "09805982089636049437",
+              "displayName": "Cole Medin",
+              "type": "user",
+              "kind": "drive#permission",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjU-zfOspR2RPV0ODNiUMTUKvYDBBCZV-dZusxjov3wKmsVu93G9IfBKLBtQef-ZfzxVCqoc8HAVOEJyVPWiFax-dpQqjp5Bmqnsiestzam2U55u4Y7m3qszgGuIwTYYCQ4-TI6w2ActqiVwzXSrFt8hF5q5UYn1zzHvR8OG1fQHhoxUgOpsSwsylfLh2gRj49gNFuJ0tQZFIT37R0-dsKLjV0DqBDUpqHgP4mnA02dUgy3D9BjshwfHQY-IdWnK1xGTrunpzeHBrIE306eUhHcXaN2D0P8vAdpFRjTKyJMCDVp5ZVMn79MSZwUVbN9TGD_u4DpbXFVB27hi4MjS8mHblF5tJLSKtLs-UW4itcrt-QnUMeHkIEpcly8vsGcuiOmyNHlldsJ79HhOsSPhY9vxvwSpXBOn_9F15_808Om2de0duT2RewGeMlEXXjE0PO456Y4BStBV1uRa3VceZ2l3MgXkbF8BZG_f0DjNrVkW7xqdOHBArDO87vRhEawPlaWPTFw8UX7kGRsV9jIyRuLmvcSINIW2nEuZOXyKFeHR6IfIRIuTk0F7E0qk8WFtQlvVx-a--ELays2G5R1oVqrFst2mbO6U9wQz9Uhz3SDsIh6OB7S0e86x0hkdFS1lbKmxSqpXx-d-kcYuW88etuwSYnoZEQVAs1Vyu_XHYxfMw_nFZ0PTH_LMc9DYINUILulRvuMPq_bfkusoIr4EEyZTGtQVy-4qf01eEgRCG1xGBIN6_6dzyWGZoHdayfSXyDoFfwE2vcWBz30qFeImwis1u67VnbWCyfC0vb8rEScWo19XpyxW81umlcTlOXA8buq7nnD8IgVETwn7islB-mzsjnQOtrjDCOJ4T4KdzYYpM0iWdwSbhu95sDfa2GBeNSM6_shlwwm88V56XEyDZ7t0K52rtgjX7tI9qQg_5uAsQSmUQWwHXs1qLw_0Lm8HJm7NTJey6_uN2pCzhM-eajxl3Gw=s64",
+              "emailAddress": "colemedin@ottomator.ai",
+              "role": "owner",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "hasThumbnail": true,
+          "spaces": [
+            "drive"
+          ],
+          "id": "1py8boCNhGKiZ4EUJ3jAP8rNDVxYArwoOJsg0xXeAWlM",
+          "name": "Test Sheet #1",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "createdTime": "2025-02-23T17:00:50.000Z",
+          "modifiedTime": "2025-02-23T17:43:45.286Z",
+          "modifiedByMeTime": "2025-02-23T17:43:45.286Z",
+          "viewedByMeTime": "2025-02-23T18:21:12.774Z",
+          "quotaBytesUsed": "1024",
+          "version": "17",
+          "ownedByMe": true,
+          "isAppAuthorized": false,
+          "capabilities": {
+            "canChangeViewersCanCopyContent": true,
+            "canEdit": true,
+            "canCopy": true,
+            "canComment": true,
+            "canAddChildren": false,
+            "canDelete": true,
+            "canDownload": true,
+            "canListChildren": false,
+            "canRemoveChildren": false,
+            "canRename": true,
+            "canTrash": true,
+            "canReadRevisions": true,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canMoveItemIntoTeamDrive": true,
+            "canUntrash": true,
+            "canModifyContent": true,
+            "canMoveItemOutOfDrive": true,
+            "canAddMyDriveParent": false,
+            "canRemoveMyDriveParent": true,
+            "canMoveItemWithinDrive": true,
+            "canShare": true,
+            "canMoveChildrenWithinDrive": false,
+            "canModifyContentRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canAcceptOwnership": false,
+            "canReadLabels": false,
+            "canModifyLabels": false,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canRemoveContentRestriction": false,
+            "canDisableInheritedPermissions": false,
+            "canEnableInheritedPermissions": true
+          },
+          "thumbnailVersion": "3",
+          "modifiedByMe": true,
+          "permissionIds": [
+            "09805982089636049437"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert into Supabase Vectorstore",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert into Supabase Vectorstore",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Created": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Updated": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document Text": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase Vectorstore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Doc Rows": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Data Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set File ID": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Doc Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Text": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase Vectorstore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Set Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert into Supabase Vectorstore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Document Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into Supabase Vectorstore": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from Excel": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert Table Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Schema": {
+      "main": [
+        [
+          {
+            "node": "Update Schema for Document Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from CSV": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert Table Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Document Metadata Table": {
+      "main": [
+        [
+          {
+            "node": "Create Document Rows Table (for Tabular Data)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Documents": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Contents": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Document Rows": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set File ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Data Rows": {
+      "main": [
+        [
+          {
+            "node": "Insert Document Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Document Metadata": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Documents Table and Match Function": {
+      "main": [
+        [
+          {
+            "node": "Create Document Metadata Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Create Documents Table and Match Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5d574351-9913-4071-9bfe-f553e130f4a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9af398ac7c627c2bd355c90c29118876e61fec21e0425eeb3bdd7b7fefbad1f3"
+  },
+  "id": "ygJxwOzBA6hIMdBw",
+  "tags": []
+}

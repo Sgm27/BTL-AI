@@ -1,0 +1,34 @@
+CẢNH BÁO TỒN KHO - CẬP NHẬT NGÀY 28/05/2023
+
+=== SẢN PHẨM CẦN NHẬP HÀNG GẤP (SỐ LƯỢNG TỒN < 10) ===
+1. [SP005] Túi Xách Nữ Thời Trang - Số lượng tồn: 9
+2. [SP009] Đồng Hồ Nam Thời Trang - Số lượng tồn: 8
+
+=== SẢN PHẨM CẦN NHẬP HÀNG (SỐ LƯỢNG TỒN < 15) ===
+1. [SP004] Áo Khoác Dù Nam - Số lượng tồn: 14
+2. [SP008] Váy Dài Nữ - Số lượng tồn: 15
+3. [SP015] Ví Da Nam - Số lượng tồn: 12
+
+=== SẢN PHẨM BÁN CHẠY TRONG THÁNG ===
+1. [SP001] Áo Thun Nam Basic - Đã bán: 6 - Tồn kho: 43
+2. [SP006] Áo Sơ Mi Nam Dài Tay - Đã bán: 3 - Tồn kho: 37
+3. [SP002] Quần Jeans Nam Slim Fit - Đã bán: 1 - Tồn kho: 29
+
+=== SẢN PHẨM TỒN KHO LÂU (> 90 NGÀY) ===
+1. [SP010] Dép Nam Casual - Ngày nhập cuối: 15/01/2023 - Tồn kho: 25
+2. [SP013] Vớ Nam Cổ Ngắn - Ngày nhập cuối: 20/01/2023 - Tồn kho: 100
+3. [SP014] Nón Lưỡi Trai - Ngày nhập cuối: 10/02/2023 - Tồn kho: 40
+
+=== ĐỀ XUẤT NHẬP HÀNG ===
+1. [SP005] Túi Xách Nữ Thời Trang - Đề xuất nhập: 15 đơn vị
+2. [SP009] Đồng Hồ Nam Thời Trang - Đề xuất nhập: 10 đơn vị
+3. [SP004] Áo Khoác Dù Nam - Đề xuất nhập: 10 đơn vị
+4. [SP015] Ví Da Nam - Đề xuất nhập: 10 đơn vị
+
+=== ĐỀ XUẤT KHUYẾN MÃI GIẢM TỒN KHO ===
+1. [SP010] Dép Nam Casual - Đề xuất giảm giá: 30%
+2. [SP013] Vớ Nam Cổ Ngắn - Đề xuất giảm giá: 40% hoặc mua 3 tặng 1
+3. [SP014] Nón Lưỡi Trai - Đề xuất giảm giá: 25%
+
+Người lập báo cáo: Trần Văn Bình
+Ngày lập báo cáo: 28/05/2023 
